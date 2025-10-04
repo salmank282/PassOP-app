@@ -10,46 +10,63 @@ const Manager = () => {
   const eyeRef = useRef();
   const passwordRef = useRef();
 
-  useEffect(() => {
-    let passwords = localStorage.getItem("passwords");
-    if (passwords) {
-      setPasswordArray(JSON.parse(passwords));
-    }
-  }, []);
-
-  const savePassword = () => {
-    if(form.site.length>3 && form.username.length>3 && form.password.length>3  )
-   { setPasswordArray([...passwordArray, { ...form, id: uuidv4() }]);
-    localStorage.setItem(
-      "passwords",
-      JSON.stringify([...passwordArray, { ...form, id: uuidv4() }])
-    );
-    console.log([...passwordArray, form]);
-    setForm({ site: "", username: "", password: "" });
-     toast("Password Saved..!", {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });}
-      else{
-        toast("Error : Password not Saved..!")
-      }
-
+  const getPasswords = async () => {
+    let req = await fetch("http://localhost:3000/");
+    let passwords = await req.json();
+    setPasswordArray(passwords);
   };
 
-  const deletePassword = (id) => {
-    let c = confirm("Are you sure ...You want to delete?");
-    if (c) {
-      const newpasswordArray = passwordArray.filter((item) => {
-        return item.id !== id;
+  useEffect(() => {
+    getPasswords();
+  }, []);
+
+  const savePassword = async () => {
+    if (
+      form.site.length > 3 &&
+      form.username.length > 3 &&
+      form.password.length > 3
+    ) {
+      if (form.id) {
+        await fetch(`http://localhost:3000/${form.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+        toast("Password Updated..!", {theme: "dark"})
+      } else {
+        await fetch("http://localhost:3000/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, id: uuidv4() }),
+        });
+        toast("Password Saved..!", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      }
+      console.log([...passwordArray, form]);
+      getPasswords();
+      setForm({ site: "", username: "", password: "" });
+    } else {
+      toast("Error : Password not Saved..!");
+    }
+  };
+
+  const deletePassword = async (id) => {
+    let confirmDelete = confirm("Are you sure ...You want to delete?");
+    if (confirmDelete) {
+      await fetch(`http://localhost:3000/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, id }),
       });
-      setPasswordArray(newpasswordArray);
-      localStorage.setItem("passwords", JSON.stringify(newpasswordArray));
+      getPasswords();
       toast("Password Deleted successfully..!", {
         position: "top-right",
         autoClose: 1500,
@@ -61,23 +78,22 @@ const Manager = () => {
         theme: "dark",
       });
     }
-
   };
 
   const editPassword = (id) => {
-    const newPassword = passwordArray.find((item) => item.id === id);
-    setForm(newPassword);
-    setPasswordArray(passwordArray.filter((item) => item.id !== id));
+    const passwordToEdit = passwordArray.find((item) => item.id === id);
+    setForm(passwordToEdit);
+    console.log(passwordToEdit);
     toast("Edit the Password..!", {
-        position: "top-right",
-        autoClose: 1500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
+      position: "top-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
   };
 
   const showPassword = () => {
@@ -109,8 +125,8 @@ const Manager = () => {
   };
 
   return (
-    <div>
-      <ToastContainer
+    <div className="mb-12">
+      {/* <ToastContainer
         position="top-right"
         autoClose={1500}
         hideProgressBar={false}
@@ -121,7 +137,7 @@ const Manager = () => {
         draggable
         pauseOnHover
         theme="light"
-      />
+      /> */}
       {/* Same as */}
       <ToastContainer />
       <div className="absolute top-0 -z-10 h-full w-full bg-green-50 ">
@@ -143,7 +159,7 @@ const Manager = () => {
             id="site"
             placeholder="Enter website URL"
             className="rounded-full w-full border border-green-600 py-1 px-4 "
-            />
+          />
           <div className="flex flex-col md:flex-row gap-8 w-full">
             <input
               value={form.username}
@@ -153,7 +169,7 @@ const Manager = () => {
               name="username"
               placeholder="Enter Username"
               className="rounded-full w-full border border-green-600 py-1 px-4 "
-              />
+            />
             <div className="relative flex items-center">
               <input
                 value={form.password}
@@ -201,7 +217,9 @@ const Manager = () => {
         </div>
       </div>
       <div className="passwords">
-        <h2 className="py-4 w-3/4 mx-auto font-bold text-2xl">Your Passwords</h2>
+        <h2 className="py-4 w-3/4 mx-auto font-bold text-2xl">
+          Your Passwords
+        </h2>
         {passwordArray.length == 0 && (
           <div className="text-xl w-3/4 mx-auto ">No Passwords to show</div>
         )}
@@ -265,7 +283,7 @@ const Manager = () => {
                     </td>
                     <td className="py-2 text-center  border border-white">
                       <div className="flex  justify-center items-center">
-                        <span>{item.password}</span>
+                        <span>{"*".repeat(item.password.length)}</span>
                         <div
                           className="size-7 cursor-pointer"
                           onClick={() => {

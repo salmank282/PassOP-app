@@ -6,13 +6,13 @@ import Footer from './components/Footer'
 function App() {
 
   return (
-    <>
+    <div>
     <Navbar />
     <div className='min-h-[86vh] '>
     <Manager />
     </div>
     <Footer />
-    </>
+    </div>
   )
 }
 

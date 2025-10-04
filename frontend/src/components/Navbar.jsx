@@ -9,19 +9,19 @@ const Navbar = () => {
                 Pass
                 <span className="text-green-600">OP/&gt;</span>
                 </div>
-            {/* <ul>
-              <li className="flex gap-4 ">
-                <a className="hover:font-bold" href="/">
+            <ul>
+              <li className="flex gap-4">
+                <p className="hover:font-bold">
                   Home
-                </a>
-                <a className="hover:font-bold" href="/">
+                </p>
+                <p className="hover:font-bold">
                   About Us
-                </a>
-                <a className="hover:font-bold" href="/">
+                </p>
+                <p className="hover:font-bold">
                   Contact
-                </a>
+                </p>
               </li>
-            </ul> */}
+            </ul>
             <div>
                 <button className="text-white flex justify-between items-center hover:bg-green-500 bg-green-600 rounded-full gap-2 py-1 px-2 ring-black ring-1">
                 <img src="src/assets/github.png" alt="" className="w-8"/>

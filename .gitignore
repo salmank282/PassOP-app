@@ -9,6 +9,3 @@ dist/
 build/
 .next/
 coverage/
-
-# Environment files
-.env
